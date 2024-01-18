@@ -6,9 +6,18 @@ Description: 文件程序主入口
 Copyright (c) 2024 by chenzhdia3@163.com, All Rights Reserved. 
 '''
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from autotest.init.logger_init import init_logger, logger
+from functools import lru_cache
+from config import Configs
+from typing_extensions import Annotated
+import os
+
+@lru_cache
+def get_settings():
+    return Configs()
+
 
 async def startup():
     init_logger()
@@ -30,6 +39,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title='FastRunner', lifespan=lifespan)
+
+
+@app.get("/info")
+async def info(settings: Annotated[Configs, Depends(get_settings)]):
+    return {
+        "app_name": settings.LOGGER_DIR,
+        "admin_email": settings.MYSQL_DATABASE_HOST,
+        
+    }
     
 
 if __name__ == '__main__':
