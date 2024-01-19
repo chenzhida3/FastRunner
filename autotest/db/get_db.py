@@ -15,6 +15,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from  config import config
+
+
 SQLALCHEMY_DATABASE_URL = "mysql+pymysql://"+config.MYSQL_DATABASE_USERNAME+":"+config.MYSQL_DATABASE_PASSWORD+"@"+str(config.MYSQL_DATABASE_HOST)+":"+str(config.MYSQL_DATABASE_PORT)+"/"+config.MYSQL_DATABASE_DB
 
 engine = create_engine(
@@ -23,3 +25,11 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+def get_test_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+get_db = get_test_db
