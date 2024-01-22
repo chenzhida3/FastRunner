@@ -47,11 +47,12 @@ class User(BaseTable,Base):
         return db.query(User).filter(User.username == username, User.enabled_flag == 1).first()
     
     @classmethod
-    async def create_user(cls, db: Session, user_info: UserIn):
-        db_user = User(**user_info.dict())
+    async def create_user(cls, db: Session, user_info: UserIn): 
+        data = user_info.model_dump()
+        db_user = User(**data)
         db.add(db_user)
         db.commit()
-        db.refresh()
+        db.refresh(db_user)
 
 
 
