@@ -26,6 +26,8 @@ class Configs(BaseSettings):
     MYSQL_DATABASE_USERNAME: str
     MYSQL_DATABASE_PASSWORD: str
     MYSQL_DATABASE_DB: str
+
+    API_PREFIX: str = "/api"  # 接口前缀
         
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=True, extra='ignore')
 

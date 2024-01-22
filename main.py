@@ -9,16 +9,11 @@ import uvicorn
 from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from autotest.init.logger_init import init_logger, logger
+from autotest.init.router_init import init_router
 from functools import lru_cache
 from config import Configs
 from typing_extensions import Annotated
 import os
-
-from autotest.services.system.user import UserService
-from autotest.schemas.system.user import UserIn
-from autotest.models.system_models import User
-from autotest.db.get_db import get_db
-from sqlalchemy.orm import Session
 
 @lru_cache
 def get_settings():
@@ -26,6 +21,7 @@ def get_settings():
 
 
 async def startup():
+    init_router(app)  # 加载路由
     init_logger()
     logger.info("日志初始化成功")
 
@@ -55,10 +51,7 @@ async def info(settings: Annotated[Configs, Depends(get_settings)]):
         
     }
 
-@app.post("/create")
-async def create_user(user_info: UserIn, db: Session = Depends(get_db)):
-    user_info = await UserService.user_register(db, user_info)
-    print(user_info)
+
 
 if __name__ == '__main__':
     uvicorn.run(app='main:app', host='127.0.0.1', port=8201, reload=True)
