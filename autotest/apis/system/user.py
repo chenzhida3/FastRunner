@@ -13,8 +13,9 @@ from sqlalchemy.orm import Session
 
 from autotest.services.system.user import UserService
 from autotest.schemas.system.user import UserIn
-from autotest.models.system_models import User
+from autotest.utils.http_response import resp_200
 from autotest.db.get_db import get_db
+from fastapi.encoders import jsonable_encoder
 
 
 
@@ -23,4 +24,5 @@ router = APIRouter()
 @router.post('/userRegister', description='新增用户')
 async def user_register(user_info: UserIn, db: Session = Depends(get_db)):
     data = await UserService.user_register(db, user_info)
-    print(data)
+    return resp_200(data=data)
+    

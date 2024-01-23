@@ -21,5 +21,4 @@ class BaseTable:
     updation_date = Column(DateTime(), default=func.now(), onupdate=func.now(), comment='更新时间')
     updated_by = Column(BigInteger, comment='更新人ID')
     enabled_flag = Column(Boolean(), default=1, nullable=False, comment='是否删除, 0 删除 1 非删除')
-    trace_id = Column(String(255), comment="trace_id")
 

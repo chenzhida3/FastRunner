@@ -12,10 +12,13 @@ import os
 GRANDFA = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))))
 sys.path.append(GRANDFA)
 
+
 from sqlalchemy.orm import Session
 from autotest.schemas.system.user import UserIn
 from autotest.models.system_models import User
-from autotest.db.get_db import get_db
+from autotest.utils.codes import CodeEnum
+from autotest.utils.jwtTool import Jwt_tool
+from autotest.utils.http_response import resp_502
 
 class UserService:
     """用户类服务"""
@@ -25,12 +28,18 @@ class UserService:
         """用户注册"""
         user = await User.get_user_by_name(db, user_info.username)
         if user:
-            print('已被注册')
-        else:
-            user = await User.create_user(db, user_info)
-            return user
+            data = {"code":CodeEnum.USERNAME_OR_EMAIL_IS_REGISTER.code,
+                    "msg":CodeEnum.USERNAME_OR_EMAIL_IS_REGISTER.msg}
+            return data
+        try:
+            user_info.password = Jwt_tool.get_password_hash(user_info.password)
+        except:
+            raise resp_502(data={})
+        await User.create_user(db, user_info)
+        return {"username": user_info.username,
+                "code":CodeEnum.PARTNER_CODE_OK.code,
+                "msg":CodeEnum.PARTNER_CODE_OK.msg}
     
 
-if __name__ == '__main__':
-    UserService.user_register("czd")
+
 
