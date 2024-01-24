@@ -12,11 +12,13 @@ import os
 GRANDFA = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 sys.path.append(GRANDFA)
 
-from sqlalchemy import Column, String, Text, JSON, Integer
+from sqlalchemy import Column, String, Text, JSON, Integer, and_
 from sqlalchemy.orm import Session
 from autotest.db.get_db import Base, engine
 from autotest.models.baseTable import BaseTable
-from autotest.schemas.system.user import UserIn
+from autotest.schemas.system.user import UserIn, UserQuery
+
+from fastapi.encoders import jsonable_encoder
 
 
 
@@ -48,12 +50,58 @@ class User(BaseTable,Base):
     
     @classmethod
     async def create_user(cls, db: Session, user_info: UserIn): 
+        """创建用户     
+
+        Args:
+            db (Session): 数据库谅解
+            user_info (UserIn): 请求体内容
+        """
         data = user_info.model_dump()
         db_user = User(**data)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
+    
+    @classmethod
+    async def get_user_list(cls, db: Session, params: UserQuery):
+        data = db.query(User).filter(User.enabled_flag==1).all()
+        # 看请求体是否带以下参数，如果有则取满足所有条件的数据
+        if params.id:
+            data = db.query(User).filter(and_(User.id==params.id,
+                                            User.enabled_flag==1)).all()
+        if params.username:
+            data = db.query(User).filter(User.username.like(f"%{params.username}%"),
+                                            User.enabled_flag==1).all()
+        if params.nickname:
+            data = db.query(User).filter(User.nickname.like(params.nickname),
+                                            User.enabled_flag==1).all()
+        if params.id and params.username:
+            data = db.query(User).filter(User.id==params.id, User.username.like(params.username), 
+                                        User.enabled_flag==1).all()
+        if params.id and params.nickname:
+            data = db.query(User).filter(User.id==params.id, User.nickname.like(params.nickname), 
+                                            User.enabled_flag==1).all()
+        if params.username and params.nickname:
+            data = db.query(User).filter(User.username.like(params.username), 
+                                        User.nickname.like(params.nickname),User.enabled_flag==1).all()
+        
+        if params.id and params.username and params.nickname:
+            data = db.query(User).filter(User.id==params.id, User.username.like(params.username), 
+                                        User.nickname.like(params.nickname),User.enabled_flag==1).all()
+        
+        res = []
+        if len(data) > 0:
+            for item in data:
+                userdata = User(id=item.id, username=item.username, nickname=item.nickname,
+                                    email=item.email, roles=item.roles, status=item.status, remarks=item.remarks
+                                    , creation_date=item.creation_date, updation_date=item.updation_date)
+                res.append(jsonable_encoder(userdata))
+        return res
 
+        
+
+
+        
 
 
 if __name__ == '__main__':

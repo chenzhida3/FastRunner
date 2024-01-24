@@ -14,7 +14,7 @@ sys.path.append(GRANDFA)
 
 
 from sqlalchemy.orm import Session
-from autotest.schemas.system.user import UserIn
+from autotest.schemas.system.user import UserIn, UserQuery
 from autotest.models.system_models import User
 from autotest.utils.codes import CodeEnum
 from autotest.utils.jwtTool import Jwt_tool
@@ -24,7 +24,7 @@ class UserService:
     """用户类服务"""
 
     @staticmethod
-    async def user_register(db: Session, user_info: UserIn) -> "User":
+    async def user_register(db: Session, user_info: UserIn) -> "dict":
         """用户注册"""
         user = await User.get_user_by_name(db, user_info.username)
         if user:
@@ -41,5 +41,14 @@ class UserService:
                 "msg":CodeEnum.PARTNER_CODE_OK.msg}
     
 
+    @staticmethod
+    async def list(db: Session, params: UserQuery) -> dict:
+        """获取用户列表"""
+        data = await User.get_user_list(db, params)
+        return data
 
 
+if __name__ == '__main__':
+    a = {"id": "1", "name":"czd", "czd": None, "s": None}
+    query = {key:value for key, value in a.items() if value is not None}
+    print(**query)

@@ -8,11 +8,11 @@
 @Desc    :   接口请求时，请求体的模型校验
 '''
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserIn(BaseModel):
-    """用户录入数据库模型
+    """用户注册请求体模型
 
     Args:
         BaseModel (基类): 
@@ -27,4 +27,12 @@ class UserIn(BaseModel):
     tags: Optional[List] = None
     roles: Optional[List] = None
 
+class UserQuery(BaseModel):
+    """用户查询请求模型
 
+    Args:
+        BaseModel (_type_): _description_
+    """
+    id: int = Field(None, description="用户id")
+    username: str = Field(None, description="用户名")
+    nickname: str = Field(None, description="昵称")
