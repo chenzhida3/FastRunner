@@ -36,3 +36,17 @@ class UserQuery(BaseModel):
     id: int = Field(None, description="用户id")
     username: str = Field(None, description="用户名")
     nickname: str = Field(None, description="昵称")
+
+   
+class UserOut(BaseModel):
+    username: str 
+    nickname: str 
+    email: Optional[str] = None
+    user_type: Optional[str] = None
+    remarks: Optional[str] = None
+    avatar: Optional[str] = None
+    tags: Optional[List] = None
+    roles: Optional[List] = None
+
+    class Config:
+        orm_mode = True

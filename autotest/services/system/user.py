@@ -20,6 +20,10 @@ from autotest.utils.codes import CodeEnum
 from autotest.utils.jwtTool import Jwt_tool
 from autotest.utils.http_response import resp_502
 
+from fastapi_pagination import Page
+from fastapi.encoders import jsonable_encoder
+
+
 class UserService:
     """用户类服务"""
 
@@ -42,11 +46,25 @@ class UserService:
     
 
     @staticmethod
-    async def list(db: Session, params: UserQuery) -> dict:
+    async def list(db: Session, params: UserQuery, page: int, size: int):
         """获取用户列表"""
-        data = await User.get_user_list(db, params)
-        return data
+        query = await User.get_user_list(db, params)
+        total = query.count()
+        items = query.offset((page - 1) * size).limit(size).all()
+        res = []
+        if len(items) > 0:
+            for item in items:
+                userdata = User(id=item.id, username=item.username, nickname=item.nickname,
+                                    email=item.email, roles=item.roles, status=item.status, remarks=item.remarks
+                                    , creation_date=item.creation_date, updation_date=item.updation_date)
+                res.append(jsonable_encoder(userdata))
+        # 使用 paginate 函数进行分页查询
+        items_page = Page(total=total, page=page, size=size, items=res)
 
+        # 返回带有分页信息的结果
+        return items_page
+        
+    
 
 if __name__ == '__main__':
     a = {"id": "1", "name":"czd", "czd": None, "s": None}

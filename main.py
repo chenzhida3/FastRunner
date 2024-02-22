@@ -13,7 +13,6 @@ from autotest.init.router_init import init_router
 from functools import lru_cache
 from config import Configs
 from typing_extensions import Annotated
-import os
 
 @lru_cache
 def get_settings():
@@ -33,7 +32,7 @@ async def shutdown():
 async def lifespan(app: FastAPI):
     # yield之前 相当于 startup
     await startup()
-
+    
     yield
 
     # yield之前 相当于 shutdown
